@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+<head><title>Orders Statistics</title></head>
+<body>
+    <h2>Orders Statistics</h2>
+    <p>Total orders: {{ total_orders }}</p>
+    <p>Total meals ordered: {{ total_meals }}</p>
+    <p>Total revenue: ${{ "%.2f"|format(total_revenue) }}</p>
+
+    <br>
+    <a href="/orders">Back to Orders</a>
+</body>
+</html>
