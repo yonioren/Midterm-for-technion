@@ -5,7 +5,7 @@ ENV PYTHONUNBUFFERED=1 ## Do not use buffer for log - write immediately
 
 WORKDIR /Midterm
 
-COPY requirements.txt .
+COPY ../Python/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY python .
