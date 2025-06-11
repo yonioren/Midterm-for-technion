@@ -2,7 +2,7 @@ from flask import Flask, render_template
 from controllers.meal_controller import meal_bp
 from controllers.order_controller import order_bp
 
-app = Flask(__name__, template_folder="view/templates")
+app = Flask(__name__, template_folder="views/templates")
 app.register_blueprint(meal_bp)
 app.register_blueprint(order_bp)
 
