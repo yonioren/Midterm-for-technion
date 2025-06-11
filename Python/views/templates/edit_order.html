@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head><title>Edit Order #{{ order.id }}</title></head>
+<body>
+    <h2>Edit Order #{{ order.id }}</h2>
+    <form method="post">
+        Name: <input type="text" name="customer_name" value="{{ order.customer_name }}" required><br><br>
+
+        <table border="1" cellpadding="5" cellspacing="0">
+            <thead>
+                <tr>
+                    <th>Meal</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for meal in meals %}
+                <tr>
+                    <td>{{ meal.name }}</td>
+                    <td>${{ "%.2f"|format(meal.price) }}</td>
+                    <td>
+                        <input type="number" name="quantity_{{ meal.name }}" min="0" value="{{ order.meal_quantities.get(meal.name, 0) }}" style="width: 60px;">
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <br>
+        <button type="submit">Update Order</button>
+    </form>
+
+    <br>
+    <a href="/orders">Back to Orders</a>
+</body>
+</html>
