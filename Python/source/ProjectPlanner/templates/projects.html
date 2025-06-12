@@ -18,11 +18,9 @@
   {% for project in projects %}
     <form method="POST" action="/projects/edit/{{ project.id }}">
       <fieldset style="margin-bottom:15px;">
-      {% if project.resources %}
         <legend>Project</legend>
 
         <p>&nbsp;&nbsp;Name: <input name="name" value="{{ project.name }}"></p>
-
         {% set ns = namespace(total_items=0, total_cost=0) %}
         <table border="1" cellpadding="4" cellspacing="0">
           <tr>
@@ -55,9 +53,6 @@
 
         <br>
         <button>Save</button>
-      {% else %}
-      <p><em>No resources assigned to this project yet.</em></p>
-      {% endif %}
       </fieldset>
     </form>
 

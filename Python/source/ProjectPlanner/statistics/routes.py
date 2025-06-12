@@ -3,49 +3,58 @@ from . import statistics_bp
 from ..models import inventory_items, projects
 
 @statistics_bp.route('/')
-def view_stats():
-    total_price = []
-    project_sizes = []
-    most_expensive = (0, None)
-    resource_usage = {}
+def show_stats():
+    # Defaults
+    avg_price = 0
+    total_sum = 0
+    project_count = len(projects)
+    inventory_count = len(inventory_items)
+    most_expensive_project = None
+    largest_project = None
+    most_used_item = None
+    most_used_count = 0
+    avg_resources = 0
 
-    for p in projects:
-        cost = 0
-        size = 0
-        for item_id, qty in p.resources.items():
-            item = next((i for i in inventory_items if i.id == item_id), None)
-            if item:
-                cost += item.price * qty
-                size += qty
-                resource_usage[item_id] = resource_usage.get(item_id, 0) + qty
-        total_price.append(cost)
-        project_sizes.append((size, p))
-        if cost > most_expensive[0]:
-            most_expensive = (cost, p)
+    if projects:
+        project_costs = []
+        resource_counts = []
+        usage_counter = {}
 
-    avg_price = sum(total_price) / len(total_price) if total_price else 0
-    total_cost = sum(total_price)
-    largest_project = max(project_sizes, default=(0, None))[1]
-    most_expensive_project = most_expensive[1]
+        for project in projects:
+            total_cost = 0
+            total_resources = 0
+            for item_id, qty in project.resources.items():
+                item = next((i for i in inventory_items if i.id == item_id), None)
+                if item:
+                    total_cost += item.price * qty
+                    total_resources += qty
+                    usage_counter[item_id] = usage_counter.get(item_id, 0) + qty
 
-    if resource_usage:
-        most_used_id = max(resource_usage.items(), key=lambda x: x[1])[0]
-        most_used_item = next((i for i in inventory_items if i.id == most_used_id), None)
-        most_used_count = resource_usage[most_used_id]
-    else:
-        most_used_item = None
-        most_used_count = 0
+            project_costs.append((project, total_cost))
+            resource_counts.append((project, total_resources))
 
-    avg_resources = sum([sum(p.resources.values()) for p in projects]) / len(projects) if projects else 0
+        if project_costs:
+            total_sum = sum(cost for _, cost in project_costs)
+            avg_price = total_sum / len(project_costs)
+            most_expensive_project = max(project_costs, key=lambda x: x[1])[0]
+
+        if resource_counts:
+            largest_project = max(resource_counts, key=lambda x: x[1])[0]
+            avg_resources = sum(c for _, c in resource_counts) / len(resource_counts)
+
+        if usage_counter:
+            most_used_item_id = max(usage_counter, key=usage_counter.get)
+            most_used_item = next((i for i in inventory_items if i.id == most_used_item_id), None)
+            most_used_count = usage_counter[most_used_item_id]
 
     return render_template(
         'statistics.html',
         avg_price=avg_price,
-        total_price=total_cost,
-        largest_project=largest_project,
+        total_sum=total_sum,
+        project_count=project_count,
+        inventory_count=inventory_count,
         most_expensive_project=most_expensive_project,
-        inventory_count=len(inventory_items),
-        project_count=len(projects),
+        largest_project=largest_project,
         most_used_item=most_used_item,
         most_used_count=most_used_count,
         avg_resources=avg_resources

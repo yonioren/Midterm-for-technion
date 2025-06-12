@@ -3,7 +3,7 @@
 <head><meta charset="UTF-8"><title>Inventory</title></head>
 <body>
   <h2>Inventory Items</h2>
-
+                    {# Placeholder for messaging after performing actions #}
   {% with messages = get_flashed_messages() %}
   {% if messages %}
       <br>
@@ -13,7 +13,7 @@
       <br>
     {% endif %}
   {% endwith %}
-
+                      {# Show the already registered inventory #}
   <h3>--- Existing Inventory ---</h3>
   {% if items %}
   <table border="1" cellpadding="5">
@@ -27,9 +27,11 @@
         <td><input name="hd" type="number" value="{{ item.hd }}"></td>
         <td><input name="price" type="number" step="0.01" value="{{ item.price }}"></td>
         <td>
+                      {# Change specs of this specific item #}
           <button>Save</button>
       </form>
       <form method="POST" action="/inventory/delete/{{ item.id }}" style="display:inline">
+                      {# Delete this specific item #}
         <button>Delete</button>
       </form>
         </td>
@@ -37,9 +39,10 @@
     {% endfor %}
   </table>
   {% else %}
+                      {# Handling of clean display if no inventory items are registered #}
     <p>No inventory items added yet.</p>
   {% endif %}
-
+                      {# Register a new item #}
   <h3>--- Add New Inventory Item ---</h3>
   <form method="POST" action="/inventory/add">
     <input name="name" placeholder="Name" required>
