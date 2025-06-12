@@ -3,13 +3,12 @@ FROM python:3.13
 ENV PYTHONDONTWRITEBYTECODE=1 ## Do not create PYC files - save disk space
 ENV PYTHONUNBUFFERED=1 ## Do not use buffer for log - write immediately
 
-WORKDIR /Midterm
+COPY ../Python/requirements.txt /tmp/
+RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
-COPY ../Python/requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+WORKDIR /ProjectPlanner
+COPY ../Python/source .
 
-COPY python .
+EXPOSE 6666
 
-EXPOSE 8080
-
-CMD ["python", "main.py"]
+CMD ["python", "/ProjectPlanner/main.py"]
