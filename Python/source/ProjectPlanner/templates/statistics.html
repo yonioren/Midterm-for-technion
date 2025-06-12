@@ -6,14 +6,12 @@
   <ul>
     <li>Total Project Cost: ${{ '%.2f' | format(total_price) }}</li>
     <li>Average Project Cost: ${{ '%.2f' | format(avg_price) }}</li>
-    <li>
-      Largest Project by Resource Count:
-      {% if largest_project %}
-        {{ largest_project.name }}
-      {% else %}
-        None
-      {% endif %}
-    </li>
+    <li>Total Number of Projects: {{ project_count }}</li>
+    <li>Total Number of Inventory Items: {{ inventory_count }}</li>
+    <li>Most Expensive Project: {{ most_expensive_project.name if most_expensive_project else 'None' }}</li>
+    <li>Largest Project by Resource Count: {{ largest_project.name if largest_project else 'None' }}</li>
+    <li>Most Used Inventory Item: {{ most_used_item.name if most_used_item else 'None' }} ({{ most_used_count }} units)</li>
+    <li>Average Resources per Project: {{ '%.2f' | format(avg_resources) }}</li>
   </ul>
 
   <p><a href="/">Back to Home</a></p>

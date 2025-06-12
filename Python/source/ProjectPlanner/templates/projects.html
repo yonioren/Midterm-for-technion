@@ -4,37 +4,96 @@
 <body>
   <h2>Projects</h2>
 
-  <form method="POST" action="/projects/add">
-    <input name="name" placeholder="Project name" required>
-    <p>Assign resources:</p>
-    {% for item in items %}
-      <label>{{ item.name }}:
-        <input type="number" name="item_{{ item.id }}" min="0" placeholder="Qty">
-      </label><br>
-    {% endfor %}
-    <button>Add Project</button>
-  </form>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+      <br>
+      {% for message in messages %}
+        <p align="center"><strong><em>{{ message }}</em></strong></p>
+      {% endfor %}
+      <br>
+    {% endif %}
+  {% endwith %}
 
-  <hr>
-
+  <h3>--- Existing Projects ---</h3>
   {% for project in projects %}
     <form method="POST" action="/projects/edit/{{ project.id }}">
-      <h4>
-        <input name="name" value="{{ project.name }}">
+      <fieldset style="margin-bottom:15px;">
+      {% if project.resources %}
+        <legend>Project</legend>
+
+        <p>&nbsp;&nbsp;Name: <input name="name" value="{{ project.name }}"></p>
+
+        {% set ns = namespace(total_items=0, total_cost=0) %}
+        <table border="1" cellpadding="4" cellspacing="0">
+          <tr>
+            <th>Item</th><th>CPU</th><th>RAM</th><th>HD</th><th>Price</th><th>Quantity</th>
+          </tr>
+          {% for item in items %}
+            {% set qty = project.resources.get(item.id, 0) %}
+            {% set ns.total_items = ns.total_items + qty %}
+            {% set ns.total_cost = ns.total_cost + (item.price * qty) %}
+            <tr>
+              <td>{{ item.name }}</td>
+              <td>{{ item.cpu }}</td>
+              <td>{{ item.ram }}</td>
+              <td>{{ item.hd }}</td>
+              <td>${{ '%.2f' | format(item.price) }}</td>
+              <td>
+                <input type="number" name="item_{{ item.id }}" value="{{ qty }}" min="0">
+              </td>
+            </tr>
+          {% endfor %}
+          <tr>
+            <td colspan="5" align="right"><strong>Total Items:</strong></td>
+            <td><strong>{{ ns.total_items }}</strong></td>
+          </tr>
+          <tr>
+            <td colspan="5" align="right"><strong>Total Cost:</strong></td>
+            <td><strong>${{ '%.2f' | format(ns.total_cost) }}</strong></td>
+          </tr>
+        </table>
+
+        <br>
         <button>Save</button>
-      </h4>
-      {% for item_id, qty in project.resources.items() %}
-        {% set item = items | selectattr("id", "equalto", item_id) | first %}
-        <label>{{ item.name }}:
-          <input type="number" name="item_{{ item.id }}" value="{{ qty }}" min="0">
-        </label><br>
-      {% endfor %}
+      {% else %}
+      <p><em>No resources assigned to this project yet.</em></p>
+      {% endif %}
+      </fieldset>
     </form>
+
     <form method="POST" action="/projects/delete/{{ project.id }}">
       <button>Delete Project</button>
     </form>
     <hr>
   {% endfor %}
+
+  <h3>--- Add New Project ---</h3>
+  <form method="POST" action="/projects/add">
+    <fieldset>
+    {% if items %}
+      <p>Name: <input name="name" placeholder="Project name" required></p>
+      <table border="1" cellpadding="4" cellspacing="0">
+        <tr>
+          <th>Item</th><th>CPU</th><th>RAM</th><th>HD</th><th>Price</th><th>Quantity</th>
+        </tr>
+        {% for item in items %}
+        <tr>
+          <td>{{ item.name }}</td>
+          <td>{{ item.cpu }}</td>
+          <td>{{ item.ram }}</td>
+          <td>{{ item.hd }}</td>
+          <td>${{ '%.2f' | format(item.price) }}</td>
+          <td><input type="number" name="item_{{ item.id }}" min="0" placeholder="Qty"></td>
+        </tr>
+        {% endfor %}
+      </table>
+      <br>
+      <button>Add Project</button>
+    {% else %}
+    <p>No inventory items exist - please add some first.</p>
+    {% endif %}
+    </fieldset>
+  </form>
 
   <p><a href="/">Back to Home</a></p>
 </body>
