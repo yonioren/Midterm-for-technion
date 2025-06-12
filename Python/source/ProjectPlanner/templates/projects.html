@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Projects</title></head>
+<body>
+  <h2>Projects</h2>
+
+  <form method="POST" action="/projects/add">
+    <input name="name" placeholder="Project name" required>
+    <p>Assign resources:</p>
+    {% for item in items %}
+      <label>{{ item.name }}:
+        <input type="number" name="item_{{ item.id }}" min="0" placeholder="Qty">
+      </label><br>
+    {% endfor %}
+    <button>Add Project</button>
+  </form>
+
+  <hr>
+
+  {% for project in projects %}
+    <form method="POST" action="/projects/edit/{{ project.id }}">
+      <h4>
+        <input name="name" value="{{ project.name }}">
+        <button>Save</button>
+      </h4>
+      {% for item_id, qty in project.resources.items() %}
+        {% set item = items | selectattr("id", "equalto", item_id) | first %}
+        <label>{{ item.name }}:
+          <input type="number" name="item_{{ item.id }}" value="{{ qty }}" min="0">
+        </label><br>
+      {% endfor %}
+    </form>
+    <form method="POST" action="/projects/delete/{{ project.id }}">
+      <button>Delete Project</button>
+    </form>
+    <hr>
+  {% endfor %}
+
+  <p><a href="/">Back to Home</a></p>
+</body>
+</html>

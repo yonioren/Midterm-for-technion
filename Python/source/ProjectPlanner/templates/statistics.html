@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><title>Statistics</title></head>
+<body>
+  <h2>Project Statistics</h2>
+  <ul>
+    <li>Total Project Cost: ${{ '%.2f' | format(total_price) }}</li>
+    <li>Average Project Cost: ${{ '%.2f' | format(avg_price) }}</li>
+    <li>
+      Largest Project by Resource Count:
+      {% if largest_project %}
+        {{ largest_project.name }}
+      {% else %}
+        None
+      {% endif %}
+    </li>
+  </ul>
+
+  <p><a href="/">Back to Home</a></p>
+</body>
+</html>
