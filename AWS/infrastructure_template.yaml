@@ -17,6 +17,12 @@ Parameters:
   PrivateSubnet2CIDR:
     Type: String
     Default: 10.0.12.0/24
+  DockerImageName:
+    Type: String
+    Default: "@@@ DockerImageName - WILL BE OVERRIDDEN BY SCRIPT @@@"
+  SolutionStackName:
+    Type: String
+    Default: "64bit Amazon Linux 2 v4.1.2 running Docker"
 
 Resources:
 
@@ -50,6 +56,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
+      ### Select first AZ of the region
       AvailabilityZone: !Select
         - 0
         - !GetAZs ''
@@ -63,6 +70,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
+      ### Select second AZ of the region
       AvailabilityZone: !Select
         - 1
         - !GetAZs ''
@@ -77,6 +85,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
+      # Select first AZ of the region
       AvailabilityZone: !Select
         - 0
         - !GetAZs ''
@@ -89,6 +98,7 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref VPC
+      # Select second AZ of the region
       AvailabilityZone: !Select
         - 1
         - !GetAZs ''
@@ -97,7 +107,7 @@ Resources:
         - Key: Name
           Value: ProjectPlanner-PrivateSubnet2
 
-#### NAT GWs --- to allow access to ECR
+#### NAT GWs --- to allow access to ECR for pulling the image
 
   NatEIP1:
     Type: AWS::EC2::EIP
@@ -206,39 +216,43 @@ Resources:
         - Key: Name
           Value: ProjectPlanner-App-SecurityGroup
 
+#### BEANSTALK
+
+  MyElasticBeanstalkApp:
+    Type: AWS::ElasticBeanstalk::Application
+    Properties:
+      ApplicationName: ProjectPlanner
+      Description: "The ProjectPlanner deployed solution"
+
+  MyBeanstalkEnvironment:
+    Type: AWS::ElasticBeanstalk::Environment
+    Properties:
+      ApplicationName: !Ref MyElasticBeanstalkApp
+      EnvironmentName: ProjectPlanner-env
+      SolutionStackName: !Ref SolutionStackName
+      OptionSettings:
+        - Namespace: aws:elasticbeanstalk:environment:process:default
+          OptionName: Image
+          Value: !Ref DockerImageName
+        - Namespace: aws:ec2:vpc
+          OptionName: VPCId
+          Value: !Ref VPC
+        - Namespace: aws:ec2:vpc
+          OptionName: Subnets
+          Value: !Join [",", [!Ref PrivateSubnet1, !Ref PrivateSubnet2]]
+        - Namespace: aws:ec2:vpc
+          OptionName: ELBSubnets
+          Value: !Join [",", [!Ref PublicSubnet1, !Ref PublicSubnet2]]
+        - Namespace: aws:ec2:vpc
+          OptionName: SecurityGroups
+          Value: !Ref AppSecurityGroup
+        - Namespace: aws:elb
+          OptionName: LoadBalancerSecurityGroups
+          Value: !Ref WebSecurityGroup
+
 
 Outputs:
-  VPCID:
-    Value: !Ref VPC
-    Export:
-      Name: VPCID
 
-  PublicSubnet1ID:
-    Value: !Ref PublicSubnet1
-    Export:
-      Name: PublicSubnet1ID
-
-  PublicSubnet2ID:
-    Value: !Ref PublicSubnet2
-    Export:
-      Name: PublicSubnet2ID
-
-  PrivateSubnet1ID:
-    Value: !Ref PrivateSubnet1
-    Export:
-      Name: PrivateSubnet1ID
-
-  PrivateSubnet2ID:
-    Value: !Ref PrivateSubnet2
-    Export:
-      Name: PrivateSubnet2ID
-
-  WebSecurityGroupID:
-    Value: !Ref WebSecurityGroup
-    Export:
-      Name: WebSecurityGroupID
-
-  AppSecurityGroupID:
-    Value: !Ref AppSecurityGroup
-    Export:
-      Name: AppSecurityGroupID
+  LoadBalancerDNS:
+    Name: "ProjectPlanner-URL"
+    Value: !GetAtt MyBeanstalkEnvironment.EndpointURL
