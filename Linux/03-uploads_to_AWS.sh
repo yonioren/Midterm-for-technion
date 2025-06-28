@@ -2,10 +2,6 @@
 
 . CONSTS
 
-AWS_DIR="$(dirname $(readlink -f $0))/../AWS"
-AWS_TEMPLATE="${AWS_DIR}/infrastructure_template.yaml"
-AWS_DEST="${AWS_DIR}/Cloudformation.yaml"
-
 # Create ECR private repo if necessary
 if ! aws ecr describe-repositories --repository-names "$REPO_NAME" --output text >/dev/null 2>&1
 then
@@ -36,12 +32,25 @@ else
   exit 1
 fi
 
-sed "s#@@@ DockerImageName - WILL BE OVERRIDDEN BY SCRIPT @@@#${ECR_URI}:${TAG}#" ${AWS_CF_TEMPLATE} > ${AWS_CF_DEST}
-
-if [ ! -f ${AWS_CF_DEST} ]
+### Upload S3
+if ! aws s3 ls s3://${AWS_BUCKET_NAME}
 then
-  echo "Something went wrong while creating the Cloudformation yaml. Aborting"
-  exit 2
-else
-  echo "The app is ready to be deployed to AWS!"
+  aws s3 mb s3://${AWS_BUCKET_NAME}
 fi
+
+if ! aws s3 ls s3://${AWS_BUCKET_NAME}
+then
+  echo "Something went wrong while creating the s3 bucket"
+  exit 2
+fi
+
+aws s3 cp "${DOCKERRUN_AWS_JSON_SRC}" "s3://${AWS_BUCKET_NAME}/${DOCKERRUN_AWS_JSON_DST}"
+
+if [ $? -ne 0 ]
+then
+  echo "Something went wrong while uploading the version data into S3"
+  exit 3
+fi
+
+
+#### Run cloudformation

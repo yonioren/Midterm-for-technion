@@ -11,4 +11,4 @@ PYTHON_DIR="${LINUX_DIR}/../Python"
 AWS_CF_TEMPLATE="${AWS_DIR}/Cloudformation/template.yaml"
 AWS_CF_DEST="${AWS_DIR}/projectplanner.yaml"
 AWS_BEANSTALK_JSON="${AWS_DIR}/Beanstalk/Dockerrun.aws.json"
-
+AWS_BUCKET_NAME="${IMAGE}-this-string-is-damn-unique"

@@ -19,10 +19,14 @@ Parameters:
     Default: 10.0.12.0/24
   DockerImageName:
     Type: String
-    Default: "@@@ DockerImageName - WILL BE OVERRIDDEN BY SCRIPT @@@"
   SolutionStackName:
     Type: String
     Default: "64bit Amazon Linux 2 v4.1.2 running Docker"
+  S3BucketName:
+    Type: String
+  S3PathInBucket:
+    Type: String
+    Default: "Dockerrun.aws.json"
 
 Resources:
 

@@ -2,7 +2,7 @@
 
 . CONSTS
 
-aws cloudformation validate-template --template-body file://network-ha.yaml
+aws cloudformation validate-template --template-body file://${AWS_CF_TEMPLATE} # --parameter overrides
 
 #aws cloudformation create-stack \
 #  --stack-name my-network-stack \
