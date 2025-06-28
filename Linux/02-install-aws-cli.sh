@@ -1,5 +1,7 @@
 #!/bin/bash
 
+###### https://www.awsacademy.com/vforcesite/LMS_Login
+
 # Install awscli if not already installed
 if ! command -v aws &> /dev/null; then
   echo "Downloading and installing AWS CLI"
@@ -7,6 +9,7 @@ if ! command -v aws &> /dev/null; then
   cd /tmp/
   unzip awscliv2.zip
   sudo ./aws/install
+  cd -
 fi
 
 # Create ~/.aws directory with correct permissions
@@ -18,6 +21,7 @@ echo "# Please paste the connection information from the LAB (AWS Details)" > ~/
 chmod 600 ~/.aws/credentials
 
 # Open credentials file in vim
+sudo apt install vim
 vim ~/.aws/credentials
 
 # Confirm

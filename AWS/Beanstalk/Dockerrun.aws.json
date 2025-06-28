@@ -1,0 +1,11 @@
+{
+  "Image": {
+    "Name": "@@@ DockerImageName - WILL BE OVERRIDDEN BY SCRIPT @@@"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 8080,
+      "HostPort": 8000
+    }
+  ]
+}

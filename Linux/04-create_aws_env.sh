@@ -1,15 +1,16 @@
 #!/bin/bash
 
-#aws cloudformation validate-template \
- #  --template-body file://network-ha.yaml
+. CONSTS
 
-aws cloudformation create-stack \
-  --stack-name my-network-stack \
-  --template-body file://network-ha.yaml
+aws cloudformation validate-template --template-body file://network-ha.yaml
 
-aws cloudformation wait stack-create-complete \
-  --stack-name my-network-stack
-
-aws cloudformation describe-stacks \
-  --stack-name my-network-stack \
-  --query "Stacks[0].Outputs"
+#aws cloudformation create-stack \
+#  --stack-name my-network-stack \
+#  --template-body file://network-ha.yaml
+#
+#aws cloudformation wait stack-create-complete \
+#  --stack-name my-network-stack
+#
+#aws cloudformation describe-stacks \
+#  --stack-name my-network-stack \
+#  --query "Stacks[0].Outputs"

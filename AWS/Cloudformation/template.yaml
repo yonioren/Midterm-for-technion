@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: '2010-09-09'
-Description: Network infrastructure for ProjectPlanner
+Description: ProjectPlanner Resources
 
 Parameters:
   VpcCIDR:
@@ -162,29 +162,50 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
 
   # PRV
-  PrivateRouteTable:
+    # PRV1
+  PrivateRouteTable1:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref VPC
 
-  PrivateRoute:
+  PrivateRoute1:
     Type: AWS::EC2::Route
     Properties:
       RouteTableId: !Ref PrivateRouteTable
       DestinationCidrBlock: 0.0.0.0/0
-      NatGatewayId: !Ref NatGateway
+      NatGatewayId: !Ref NatGateway1
 
   PrivateSubnet1RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet1
+      RouteTableId: !Ref PrivateRouteTable1
+
+    #PRV2
+  PrivateRouteTable2:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref VPC
+
+  PrivateRoute2:
+    Type: AWS::EC2::Route
+    Properties:
       RouteTableId: !Ref PrivateRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway2
 
   PrivateSubnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref PrivateSubnet2
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTable2
+
+#### S3
+
+  S3ForBeanstalk:
+    Type: AWS::S3::Bucket
+    Properties:
+
 
 #### SECURITY GROUPS
 
@@ -254,5 +275,4 @@ Resources:
 Outputs:
 
   LoadBalancerDNS:
-    Name: "ProjectPlanner-URL"
     Value: !GetAtt MyBeanstalkEnvironment.EndpointURL

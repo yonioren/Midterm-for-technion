@@ -1,10 +1,6 @@
 #!/bin/bash
 
-SCRIPT_DIR="$(dirname "$(readlink -f "${0}")")"
-IMAGE="projectplanner"
-TAG="0.0.1"
-FULL_IMAGE_NAME="${IMAGE}:${TAG}"
-CONTAINER_NAME="demo"
+. CONSTS
 
 case "$1" in
   "-f"|"--force")
@@ -13,19 +9,19 @@ case "$1" in
     ;;
 esac
 
-if [ ! -f "${SCRIPT_DIR}/../Python/Dockerfile" ]
+if [ ! -f "${PYTHON_DIR}/Dockerfile" ]
 then
   echo "Could not find the Docker file"
   exit 127
 fi
 
-if [ ! -d "${SCRIPT_DIR}/../Python/source" ]
+if [ ! -d "${PYTHON_DIR}/source" ]
 then
   echo "Could not file the Python source code"
   exit 127
 fi
 
-if [ ! -f "${SCRIPT_DIR}/../Python/requirements.txt" ]
+if [ ! -f "${PYTHON_DIR}/requirements.txt" ]
 then
   echo "Could not find the Python dependencies file"
   exit 127
@@ -33,8 +29,8 @@ fi
 
 if [ "${FORCE}" == "true" ]
 then
-  docker kill "${CONTAINER_NAME}" &>/dev/null
-  docker rm "${CONTAINER_NAME}" &>/dev/null
+  docker kill "${DEMO_CONTAINER_NAME}" &>/dev/null
+  docker rm "${DEMO_CONTAINER_NAME}" &>/dev/null
   docker rmi "${FULL_IMAGE_NAME}" &>/dev/null
 fi
 
@@ -42,7 +38,7 @@ if [ -n "$(docker images -q "${FULL_IMAGE_NAME}" 2>/dev/null)" ]
 then
   echo "The docker image already exists. run with --force to recreate"
 else
-  cd "${SCRIPT_DIR}/../Python"
+  cd "${PYTHON_DIR}"
   docker build -t "${FULL_IMAGE_NAME}" .
   cd -
 fi
@@ -51,11 +47,11 @@ if [ -z "$(docker images -q "${FULL_IMAGE_NAME}" 2>/dev/null)" ]
 then
   echo "The ${FULL_IMAGE_NAME} image does not exist locally. aborting demo"
   exit 1
-elif [ "$(docker inspect -f "{{.State.Running}}" "${CONTAINER_NAME}" 2>/dev/null)" == "true" ]
+elif [ "$(docker inspect -f "{{.State.Running}}" "${DEMO_CONTAINER_NAME}" 2>/dev/null)" == "true" ]
 then
   echo "The app is already running. run with --force to recreate"
 else
-  docker run -it -d --rm --name "${CONTAINER_NAME}" -p 8666:8666 "${FULL_IMAGE_NAME}"
+  docker run -it -d --rm --name "${DEMO_CONTAINER_NAME}" -p 8666:8666 "${FULL_IMAGE_NAME}"
 fi
 
 if [ "${?}" -ne 0 ]

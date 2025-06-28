@@ -1,8 +1,6 @@
 #!/bin/bash
 
-SOURCE_IMAGE="projectplanner"
-REPO_NAME="projectplanner" ### serves as IMAGE NAME in AWS #####
-TAG="0.0.1"
+. CONSTS
 
 AWS_DIR="$(dirname $(readlink -f $0))/../AWS"
 AWS_TEMPLATE="${AWS_DIR}/infrastructure_template.yaml"
@@ -27,6 +25,9 @@ aws ecr get-login-password | docker login --username AWS --password-stdin "${ECR
 docker tag "${SOURCE_IMAGE}:${TAG}" "${ECR_URI}:${TAG}"
 docker push "${ECR_URI}:${TAG}"
 
+# Sometimes it takes some time for the image to be available
+sleep 5
+
 if aws ecr describe-images --repository-name "${REPO_NAME}" --image-ids "imageTag=${TAG}"
 then
   echo "The version was successfully uploaded to ECR"
@@ -35,9 +36,9 @@ else
   exit 1
 fi
 
-sed "s#@@@ DockerImageName - WILL BE OVERRIDDEN BY SCRIPT @@@#${REPO_NAME}:${TAG}#" ${AWS_TEMPLATE} > ${AWS_DEST}
+sed "s#@@@ DockerImageName - WILL BE OVERRIDDEN BY SCRIPT @@@#${ECR_URI}:${TAG}#" ${AWS_CF_TEMPLATE} > ${AWS_CF_DEST}
 
-if [ ! -f ${AWS_DEST} ]
+if [ ! -f ${AWS_CF_DEST} ]
 then
   echo "Something went wrong while creating the Cloudformation yaml. Aborting"
   exit 2
