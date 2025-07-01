@@ -19,7 +19,7 @@ Parameters:
     Default: 10.0.12.0/24
   SolutionStackName:
     Type: String
-    Default: "64bit Amazon Linux 2 v4.1.2 running Docker"
+    Default: "64bit Amazon Linux 2 v4.2.0 running Docker"
   S3BucketName:
     Type: String
   S3PathInBucket:
@@ -172,7 +172,7 @@ Resources:
   PrivateRoute1:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTable1
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway1
 
@@ -191,7 +191,7 @@ Resources:
   PrivateRoute2:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateRouteTable2
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway2
 
@@ -201,28 +201,21 @@ Resources:
       SubnetId: !Ref PrivateSubnet2
       RouteTableId: !Ref PrivateRouteTable2
 
-#### S3
-
-  S3ForBeanstalk:
-    Type: AWS::S3::Bucket
-    Properties:
-
-
 #### SECURITY GROUPS
 
-#  WebSecurityGroup:
-#    Type: AWS::EC2::SecurityGroup
-#    Properties:
-#      VpcId: !Ref VPC
-#      GroupDescription: Allow HTTP access from the world
-#      SecurityGroupIngress:
-#        - IpProtocol: tcp
-#          FromPort: 80
-#          ToPort: 80
-#          CidrIp: 0.0.0.0/0
-#      Tags:
-#        - Key: Name
-#          Value: ProjectPlanner-LB-SecurityGroup
+  WebSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      VpcId: !Ref VPC
+      GroupDescription: Allow HTTP access from the world
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      Tags:
+        - Key: Name
+          Value: ProjectPlanner-LB-SecurityGroup
 
   AppSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -240,27 +233,30 @@ Resources:
 
 #### BEANSTALK
 
-  ProjectPlanner-BeanstalkAPP:
+  ProjectPlannerBeanstalkAPP:
     Type: AWS::ElasticBeanstalk::Application
     Properties:
       ApplicationName: ProjectPlanner
       Description: "The ProjectPlanner deployed solution"
 
-  ProjectPlanner-BeanstalkApplicationVersion:
+  ProjectPlannerBeanstalkApplicationVersion:
     Type: AWS::ElasticBeanstalk::ApplicationVersion
     Properties:
-      ApplicationName: !Ref ProjectPlanner-BeanstalkAPP
+      ApplicationName: !Ref ProjectPlannerBeanstalkAPP
       SourceBundle:
         S3Bucket: !Ref S3BucketName
         S3Key: !Ref S3PathInBucket
 
-  ProjectPlanner-BeanstalkEnvironment:
+  ProjectPlannerBeanstalkEnvironment:
     Type: AWS::ElasticBeanstalk::Environment
+    DependsOn:
+      - NatGateway1
+      - NatGateway2
     Properties:
       EnvironmentName: ProjectPlanner-docker-env
-      ApplicationName: !Ref ProjectPlanner-BeanstalkAPP
+      ApplicationName: !Ref ProjectPlannerBeanstalkAPP
       SolutionStackName: !Ref SolutionStackName
-      VersionLabel: !Ref ProjectPlanner-BeanstalkApplicationVersion
+      VersionLabel: !Ref ProjectPlannerBeanstalkApplicationVersion
       OptionSettings:
         - Namespace: aws:autoscaling:launchconfiguration
           OptionName: SecurityGroups
@@ -277,15 +273,21 @@ Resources:
         - Namespace: aws:elasticbeanstalk:environment
           OptionName: LoadBalancerType
           Value: application
+        - Namespace: aws:elbv2:loadbalancer
+          OptionName: SecurityGroups
+          Value: !Ref WebSecurityGroup
         - Namespace: aws:autoscaling:asg
           OptionName: MinSize
           Value: '2'
         - Namespace: aws:autoscaling:asg
           OptionName: MaxSize
           Value: '2'
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: IamInstanceProfile
+          Value: aws-elasticbeanstalk-ec2-role
 
 
 Outputs:
 
   LoadBalancerDNS:
-    Value: !GetAtt ProjectPlanner-BeanstalkEnvironment.EndpointURL
+    Value: !GetAtt ProjectPlannerBeanstalkEnvironment.EndpointURL

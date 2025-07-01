@@ -1,0 +1,11 @@
+{
+  "Image": {
+    "Name": "400343316983.dkr.ecr.us-east-1.amazonaws.com/projectplanner:0.0.1"
+  },
+  "Ports": [
+    {
+      "ContainerPort": 8666,
+      "HostPort": 8000
+    }
+  ]
+}
