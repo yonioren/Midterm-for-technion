@@ -29,3 +29,17 @@ if aws sts get-caller-identity
 then
   echo "The AWS cli environment is ready"
 fi
+
+AWS_REGIONS="$(aws ec2 describe-regions --query "Regions[*].RegionName" --output text)"
+
+echo "Select the AWS region to deploy on"
+select user_selection in "${AWS_REGIONS[@]}"
+do
+  if [[ -n "${user_selection}" ]]
+  then
+    aws configure set region "${user_selection}"
+  else
+    echo "Invalid selection"
+    exit 1
+  fi
+done

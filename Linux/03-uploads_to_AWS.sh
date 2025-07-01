@@ -2,6 +2,8 @@
 
 . CONSTS
 
+##### ECR #####
+
 # Create ECR private repo if necessary
 if ! aws ecr describe-repositories --repository-names "$REPO_NAME" --output text >/dev/null 2>&1
 then
@@ -32,6 +34,13 @@ else
   exit 1
 fi
 
+##### DOCKERRUN.AWS.JSON for Beanstalk
+
+sed "s#@@@ DockerImageName - WILL BE OVERRIDDEN BY SCRIPT @@@#${ECR_URI}:${TAG}#" \
+  "${AWS_BEANSTALK_JSON_TEMPLATE}" > "${AWS_BEANSTALK_JSON_SRC}"
+
+##### S3 #####
+
 ### Upload S3
 if ! aws s3 ls s3://${AWS_BUCKET_NAME}
 then
@@ -44,7 +53,7 @@ then
   exit 2
 fi
 
-aws s3 cp "${DOCKERRUN_AWS_JSON_SRC}" "s3://${AWS_BUCKET_NAME}/${DOCKERRUN_AWS_JSON_DST}"
+aws s3 cp "${AWS_BEANSTALK_JSON_SRC}" "s3://${AWS_BUCKET_NAME}/${AWS_BEANSTALK_JSON_DST}"
 
 if [ $? -ne 0 ]
 then
@@ -53,4 +62,19 @@ then
 fi
 
 
-#### Run cloudformation
+##### Cloudformation #####
+
+aws cloudformation validate-template --template-body file://${AWS_CF_TEMPLATE} --parameter \
+    "ParameterKey=S3BucketName,ParameterValue=${AWS_BUCKET_NAME}" \
+    "ParameterKey=S3PathInBucket,ParameterValue=${AWS_BEANSTALK_JSON_DST}"
+
+# cloudformation reacte-stack \
+#  --stack-name my-network-stack \
+#  --template-body file://network-ha.yaml
+#
+#aws cloudformation wait stack-create-complete \
+#  --stack-name my-network-stack
+#
+#aws cloudformation describe-stacks \
+#  --stack-name my-network-stack \
+#  --query "Stacks[0].Outputs"

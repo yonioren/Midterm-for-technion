@@ -17,8 +17,6 @@ Parameters:
   PrivateSubnet2CIDR:
     Type: String
     Default: 10.0.12.0/24
-  DockerImageName:
-    Type: String
   SolutionStackName:
     Type: String
     Default: "64bit Amazon Linux 2 v4.1.2 running Docker"
@@ -26,7 +24,6 @@ Parameters:
     Type: String
   S3PathInBucket:
     Type: String
-    Default: "Dockerrun.aws.json"
 
 Resources:
 
@@ -213,19 +210,19 @@ Resources:
 
 #### SECURITY GROUPS
 
-  WebSecurityGroup:
-    Type: AWS::EC2::SecurityGroup
-    Properties:
-      VpcId: !Ref VPC
-      GroupDescription: Allow HTTP access from the world
-      SecurityGroupIngress:
-        - IpProtocol: tcp
-          FromPort: 80
-          ToPort: 80
-          CidrIp: 0.0.0.0/0
-      Tags:
-        - Key: Name
-          Value: ProjectPlanner-LB-SecurityGroup
+#  WebSecurityGroup:
+#    Type: AWS::EC2::SecurityGroup
+#    Properties:
+#      VpcId: !Ref VPC
+#      GroupDescription: Allow HTTP access from the world
+#      SecurityGroupIngress:
+#        - IpProtocol: tcp
+#          FromPort: 80
+#          ToPort: 80
+#          CidrIp: 0.0.0.0/0
+#      Tags:
+#        - Key: Name
+#          Value: ProjectPlanner-LB-SecurityGroup
 
   AppSecurityGroup:
     Type: AWS::EC2::SecurityGroup
@@ -243,22 +240,31 @@ Resources:
 
 #### BEANSTALK
 
-  MyElasticBeanstalkApp:
+  ProjectPlanner-BeanstalkAPP:
     Type: AWS::ElasticBeanstalk::Application
     Properties:
       ApplicationName: ProjectPlanner
       Description: "The ProjectPlanner deployed solution"
 
-  MyBeanstalkEnvironment:
+  ProjectPlanner-BeanstalkApplicationVersion:
+    Type: AWS::ElasticBeanstalk::ApplicationVersion
+    Properties:
+      ApplicationName: !Ref ProjectPlanner-BeanstalkAPP
+      SourceBundle:
+        S3Bucket: !Ref S3BucketName
+        S3Key: !Ref S3PathInBucket
+
+  ProjectPlanner-BeanstalkEnvironment:
     Type: AWS::ElasticBeanstalk::Environment
     Properties:
-      ApplicationName: !Ref MyElasticBeanstalkApp
-      EnvironmentName: ProjectPlanner-env
+      EnvironmentName: ProjectPlanner-docker-env
+      ApplicationName: !Ref ProjectPlanner-BeanstalkAPP
       SolutionStackName: !Ref SolutionStackName
+      VersionLabel: !Ref ProjectPlanner-BeanstalkApplicationVersion
       OptionSettings:
-        - Namespace: aws:elasticbeanstalk:environment:process:default
-          OptionName: Image
-          Value: !Ref DockerImageName
+        - Namespace: aws:autoscaling:launchconfiguration
+          OptionName: SecurityGroups
+          Value: !Ref AppSecurityGroup
         - Namespace: aws:ec2:vpc
           OptionName: VPCId
           Value: !Ref VPC
@@ -267,16 +273,19 @@ Resources:
           Value: !Join [",", [!Ref PrivateSubnet1, !Ref PrivateSubnet2]]
         - Namespace: aws:ec2:vpc
           OptionName: ELBSubnets
-          Value: !Join [",", [!Ref PublicSubnet1, !Ref PublicSubnet2]]
-        - Namespace: aws:ec2:vpc
-          OptionName: SecurityGroups
-          Value: !Ref AppSecurityGroup
-        - Namespace: aws:elb
-          OptionName: LoadBalancerSecurityGroups
-          Value: !Ref WebSecurityGroup
+          Value: !Join [",", [!Ref PublicSubnet1, !Ref PublicSubnet1]]
+        - Namespace: aws:elasticbeanstalk:environment
+          OptionName: LoadBalancerType
+          Value: application
+        - Namespace: aws:autoscaling:asg
+          OptionName: MinSize
+          Value: '2'
+        - Namespace: aws:autoscaling:asg
+          OptionName: MaxSize
+          Value: '2'
 
 
 Outputs:
 
   LoadBalancerDNS:
-    Value: !GetAtt MyBeanstalkEnvironment.EndpointURL
+    Value: !GetAtt ProjectPlanner-BeanstalkEnvironment.EndpointURL
