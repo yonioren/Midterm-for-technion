@@ -17,7 +17,10 @@ mkdir -p ~/.aws
 chmod 700 ~/.aws
 
 # Create ~/.aws/credentials with placeholder and correct permissions
-echo "# Please paste the connection information from the LAB (AWS Details)" > ~/.aws/credentials
+if [ ! -f ~/.aws/credentials ]
+then
+  echo "# Please paste the connection information from the LAB (AWS Details)" > ~/.aws/credentials
+fi
 chmod 600 ~/.aws/credentials
 
 # Open credentials file in vim
@@ -30,14 +33,15 @@ then
   echo "The AWS cli environment is ready"
 fi
 
-AWS_REGIONS="$(aws ec2 describe-regions --query "Regions[*].RegionName" --output text)"
+AWS_REGIONS="$(aws ec2 describe-regions --query "Regions[*].RegionName" --output text --region us-east-1)"
 
 echo "Select the AWS region to deploy on"
-select user_selection in "${AWS_REGIONS[@]}"
+select user_selection in ${AWS_REGIONS[@]}
 do
   if [[ -n "${user_selection}" ]]
   then
     aws configure set region "${user_selection}"
+    break
   else
     echo "Invalid selection"
     exit 1

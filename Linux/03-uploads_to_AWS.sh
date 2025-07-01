@@ -64,9 +64,9 @@ fi
 
 ##### Cloudformation #####
 
-aws cloudformation validate-template --template-body file://${AWS_CF_TEMPLATE} --parameter \
-    "ParameterKey=S3BucketName,ParameterValue=${AWS_BUCKET_NAME}" \
-    "ParameterKey=S3PathInBucket,ParameterValue=${AWS_BEANSTALK_JSON_DST}"
+#aws cloudformation validate-template --template-file "file://${AWS_CF_TEMPLATE}" 
+aws cloudformation deploy --template-file "${AWS_CF_TEMPLATE}" --stack-name stackname --capabilities CAPABILITY_NAMED_IAM --parameter-overrides "S3BucketName=${AWS_BUCKET_NAME}" "S3PathInBucket=${AWS_BEANSTALK_JSON_DST}"
+echo aws cloudformation deploy --template-file "${AWS_CF_TEMPLATE}" --stack-name stackname --parameter-overrides "S3BucketName=${AWS_BUCKET_NAME}" "S3PathInBucket=${AWS_BEANSTALK_JSON_DST}"
 
 # cloudformation reacte-stack \
 #  --stack-name my-network-stack \
