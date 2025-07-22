@@ -10,7 +10,9 @@ def show_stats():
     project_count = len(projects)
     inventory_count = len(inventory_items)
     most_expensive_project = None
+    most_expensive_project_cost = 0
     largest_project = None
+    largest_project_resource_count = 0
     most_used_item = None
     most_used_count = 0
     avg_resources = 0
@@ -34,12 +36,22 @@ def show_stats():
             resource_counts.append((project, total_resources))
 
         if project_costs:
-            total_sum = sum(cost for _, cost in project_costs)
+            # total_sum = sum(cost for _, cost in project_costs)
+            # most_expensive_project = max(project_costs, key=lambda x: x[1])[0]
+            for proj_tup in project_costs:
+                total_sum += proj_tup[1]
+                if most_expensive_project_cost <= proj_tup[1]:
+                    most_expensive_project_cost = proj_tup[1]
+                    most_expensive_project = proj_tup[0]
             avg_price = total_sum / len(project_costs)
-            most_expensive_project = max(project_costs, key=lambda x: x[1])[0]
+
 
         if resource_counts:
-            largest_project = max(resource_counts, key=lambda x: x[1])[0]
+            for res_tup in resource_counts:
+                if largest_project_resource_count <= res_tup[1]:
+                    largest_project_resource_count = res_tup[1]
+                    largest_project = res_tup[0]
+            # largest_project = max(resource_counts, key=lambda x: x[1])[0]
             avg_resources = sum(c for _, c in resource_counts) / len(resource_counts)
 
         if usage_counter:
@@ -54,7 +66,9 @@ def show_stats():
         project_count=project_count,
         inventory_count=inventory_count,
         most_expensive_project=most_expensive_project,
+        most_expensive_project_cost=most_expensive_project_cost,
         largest_project=largest_project,
+        largest_project_resource_count=largest_project_resource_count,
         most_used_item=most_used_item,
         most_used_count=most_used_count,
         avg_resources=avg_resources

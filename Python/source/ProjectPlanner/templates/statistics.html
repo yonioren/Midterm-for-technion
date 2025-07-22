@@ -14,10 +14,10 @@
     {% endif %}
     <li>Total Number of Projects: {{ project_count }}</li>
     {% if most_expensive_project %}
-      <li>Most Expensive Project: {{ most_expensive_project.name }}</li>
+      <li>Most Expensive Project: {{ most_expensive_project.name }} ($ {{most_expensive_project_cost}} )</li>
     {% endif %}
     {% if largest_project %}
-      <li>Largest Project by Resource Count: {{ largest_project.name }}</li>
+      <li>Largest Project by Resource Count: {{ largest_project.name }} ({{ largest_project_resource_count }} resources)</li>
     {% endif %}
     {% if avg_resources %}
       <li>Average Resources per Project: {{ '%.2f' | format(avg_resources) }}</li>

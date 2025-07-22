@@ -3,6 +3,8 @@
 <head><meta charset="UTF-8"><title>Inventory</title></head>
 <body>
   <h2>Inventory Items</h2>
+
+
                     {# Placeholder for messaging after performing actions #}
   {% with messages = get_flashed_messages() %}
   {% if messages %}
@@ -13,6 +15,8 @@
       <br>
     {% endif %}
   {% endwith %}
+
+
                       {# Show the already registered inventory #}
   <h3>--- Existing Inventory ---</h3>
   {% if items %}
@@ -25,30 +29,34 @@
         <td><input name="cpu" type="number" value="{{ item.cpu }}"></td>
         <td><input name="ram" type="number" value="{{ item.ram }}"></td>
         <td><input name="hd" type="number" value="{{ item.hd }}"></td>
-        <td><input name="price" type="number" step="0.01" value="{{ item.price }}"></td>
+        <td><input name="price" type="number" step="0.01" value="${{ '%.2f' | format(item.price) }}"></td>
         <td>
                       {# Change specs of this specific item #}
           <button>Save</button>
       </form>
-      <form method="POST" action="/inventory/delete/{{ item.id }}" style="display:inline">
-                      {# Delete this specific item #}
-        <button>Delete</button>
-      </form>
+        <form method="POST" action="/inventory/delete/{{ item.id }}" style="display:inline">
+                        {# Delete this specific item #}
+          <button>Delete</button>
+        </form>
         </td>
     </tr>
     {% endfor %}
   </table>
+
+
   {% else %}
                       {# Handling of clean display if no inventory items are registered #}
     <p>No inventory items added yet.</p>
   {% endif %}
+
+
                       {# Register a new item #}
   <h3>--- Add New Inventory Item ---</h3>
   <form method="POST" action="/inventory/add">
     <input name="name" placeholder="Name" required>
-    <input name="cpu" type="number" placeholder="CPU" required>
-    <input name="ram" type="number" placeholder="RAM" required>
-    <input name="hd" type="number" placeholder="HD" required>
+    <input name="cpu" type="number" step="1" placeholder="CPU" required>
+    <input name="ram" type="number" step="1" placeholder="RAM" required>
+    <input name="hd" type="number" step="1" placeholder="HD" required>
     <input name="price" type="number" step="0.01" placeholder="Price" required>
     <button>Add Item</button>
   </form>

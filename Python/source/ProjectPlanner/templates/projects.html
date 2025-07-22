@@ -4,6 +4,9 @@
 <body>
   <h2>Projects</h2>
 
+
+
+                {# Placeholder for messaging after performing actions #}
   {% with messages = get_flashed_messages() %}
   {% if messages %}
       <br>
@@ -14,58 +17,72 @@
     {% endif %}
   {% endwith %}
 
+
+                  {# Show the already registered projects #}
   <h3>--- Existing Projects ---</h3>
-  {% for project in projects %}
-    <form method="POST" action="/projects/edit/{{ project.id }}">
-      <fieldset style="margin-bottom:15px;">
-        <legend>Project</legend>
-
-        <p>&nbsp;&nbsp;Name: <input name="name" value="{{ project.name }}"></p>
-        {% set ns = namespace(total_items=0, total_cost=0) %}
-        <table border="1" cellpadding="4" cellspacing="0">
-          <tr>
-            <th>Item</th><th>CPU</th><th>RAM</th><th>HD</th><th>Price</th><th>Quantity</th>
-          </tr>
-          {% for item in items %}
-            {% set qty = project.resources.get(item.id, 0) %}
-            {% set ns.total_items = ns.total_items + qty %}
-            {% set ns.total_cost = ns.total_cost + (item.price * qty) %}
+  {% if projects %}
+    {% for project in projects %}
+      <form method="POST" action="/projects/edit/{{ project.id }}">
+        <fieldset style="margin-bottom:15px;">
+          <legend>{{ project.name }}</legend>
+          <p>&nbsp;&nbsp;Name: <input name="name" value="{{ project.name }}"></p>
+              {# Apparently loops in Jinja are not too friendly when we need to remember things. #}
+              {# Namespace came to the rescue #}
+          {% set ns = namespace(total_items=0, total_cost=0) %}
+          <table border="1" cellpadding="4" cellspacing="0">
             <tr>
-              <td>{{ item.name }}</td>
-              <td>{{ item.cpu }}</td>
-              <td>{{ item.ram }}</td>
-              <td>{{ item.hd }}</td>
-              <td>${{ '%.2f' | format(item.price) }}</td>
-              <td>
-                <input type="number" name="item_{{ item.id }}" value="{{ qty }}" min="0">
-              </td>
+              <th>Item</th><th>CPU</th><th>RAM</th><th>HD</th><th>Price</th><th>Quantity</th>
             </tr>
-          {% endfor %}
-          <tr>
-            <td colspan="5" align="right"><strong>Total Items:</strong></td>
-            <td><strong>{{ ns.total_items }}</strong></td>
-          </tr>
-          <tr>
-            <td colspan="5" align="right"><strong>Total Cost:</strong></td>
-            <td><strong>${{ '%.2f' | format(ns.total_cost) }}</strong></td>
-          </tr>
-        </table>
+            {% for item in items %}
+              {% set qty = project.resources.get(item.id, 0) %}
+              {% set ns.total_items = ns.total_items + qty %}
+              {% set ns.total_cost = ns.total_cost + (item.price * qty) %}
+              <tr>
+                <td>{{ item.name }}</td>
+                <td>{{ item.cpu }}</td>
+                <td>{{ item.ram }}</td>
+                <td>{{ item.hd }}</td>
+                <td>${{ '%.2f' | format(item.price) }}</td>
+                <td>
+                  <input type="number" name="item_{{ item.id }}" value="{{ qty }}" min="0">
+                </td>
+              </tr>
+            {% endfor %}
+            <tr>
+              <td colspan="5" align="right"><strong>Total Items:</strong></td>
+              <td><strong>{{ ns.total_items }}</strong></td>
+            </tr>
+            <tr>
+              <td colspan="5" align="right"><strong>Total Cost:</strong></td>
+              <td><strong>${{ '%.2f' | format(ns.total_cost) }}</strong></td>
+            </tr>
+          </table>
+                      {# Change specs of this project #}
+          <br>
+          <button>Save</button>
+        </fieldset>
+      </form>
 
-        <br>
-        <button>Save</button>
-      </fieldset>
-    </form>
+                      {# Delete project #}
+      <form method="POST" action="/projects/delete/{{ project.id }}">
+        <button>Delete Project</button>
+      </form>
+      <hr>
+    {% endfor %}
+  {% else %}
 
-    <form method="POST" action="/projects/delete/{{ project.id }}">
-      <button>Delete Project</button>
-    </form>
-    <hr>
-  {% endfor %}
 
+                        {# Handling of clean display if no projects are registered #}
+    <p>No projects added yet.</p>
+  {% endif %}
+
+
+                        {# Add new project #}
   <h3>--- Add New Project ---</h3>
   <form method="POST" action="/projects/add">
     <fieldset>
     {% if items %}
+                {# Show items in table and allow selection of amounts per item #}
       <p>Name: <input name="name" placeholder="Project name" required></p>
       <table border="1" cellpadding="4" cellspacing="0">
         <tr>
@@ -84,7 +101,10 @@
       </table>
       <br>
       <button>Add Project</button>
-    {% else %}
+
+
+      {% else %}
+              {# Handle no items registered #}
     <p>No inventory items exist - please add some first.</p>
     {% endif %}
     </fieldset>
