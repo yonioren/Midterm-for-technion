@@ -80,8 +80,8 @@
                         {# Add new project #}
   <h3>--- Add New Project ---</h3>
   <form method="POST" action="/projects/add">
-    <fieldset>
     {% if items %}
+    <fieldset>
                 {# Show items in table and allow selection of amounts per item #}
       <p>Name: <input name="name" placeholder="Project name" required></p>
       <table border="1" cellpadding="4" cellspacing="0">
@@ -103,11 +103,11 @@
       <button>Add Project</button>
 
 
-      {% else %}
+    {% else %}
               {# Handle no items registered #}
     <p>No inventory items exist - please add some first.</p>
-    {% endif %}
     </fieldset>
+    {% endif %}
   </form>
 
   <p><a href="/">Back to Home</a></p>

@@ -55,9 +55,19 @@ def show_stats():
             avg_resources = sum(c for _, c in resource_counts) / len(resource_counts)
 
         if usage_counter:
-            most_used_item_id = max(usage_counter, key=usage_counter.get)
-            most_used_item = next((i for i in inventory_items if i.id == most_used_item_id), None)
-            most_used_count = usage_counter[most_used_item_id]
+            most_used_item=0
+            most_used_count=0
+            most_used_item_id=0
+            for k, v in usage_counter:
+                if v > most_used_count:
+                    most_used_count = v
+                    most_used_item_id = k
+            for item in inventory_items:
+                if item.id == most_used_item_id:
+                    most_used_item = item
+            # most_used_item_id = max(usage_counter, key=usage_counter.get)
+            # most_used_item = next((i for i in inventory_items if i.id == most_used_item_id), None)
+            # most_used_count = usage_counter[most_used_item_id]
 
     return render_template(
         'statistics.html',

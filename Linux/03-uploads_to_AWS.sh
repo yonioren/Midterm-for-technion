@@ -29,6 +29,7 @@ docker push "${ECR_URI}:${TAG}"
 # Sometimes it takes some time for the image to be available
 sleep 5
 
+# Validation of the image in ECR
 if aws ecr describe-images --repository-name "${REPO_NAME}" --image-ids "imageTag=${TAG}"
 then
   echo "The version was successfully uploaded to ECR"
@@ -43,8 +44,13 @@ AMI_ID="$(aws ec2 describe-images --owners amazon --filters "Name=name,Values=am
 
 ##### Cloudformation #####
 
+# Deploy Stack
 aws cloudformation deploy --template-file "${AWS_CF_TEMPLATE}" --stack-name "${STACK_NAME}" --capabilities CAPABILITY_NAMED_IAM --parameter-overrides "EcrImageUrl=${ECR_URI}:${TAG}" "AmiID=${AMI_ID}"
 
+# Make sure it completed
 aws cloudformation wait stack-create-complete --stack-name "${STACK_NAME}"
 
-aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs"
+# Get the address
+DNS_TO_SURF_TO="$(aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs[0].OutputValue" --out=text)"
+
+echo "Surf to http://${DNS_TO_SURF_TO}"
