@@ -1,6 +1,8 @@
 #!/bin/bash
 
 . CONSTS
+AWS_CF_TEMPLATE="${AWS_DIR}/Cloudformation/template.yaml"
+REPO_NAME="${IMAGE}" ### serves as IMAGE NAME in AWS #####
 
 ##### ECR #####
 
@@ -20,7 +22,7 @@ ECR_URI_HOST=$(echo "${ECR_URI}" | cut -d'/' -f1)
 aws ecr get-login-password | docker login --username AWS --password-stdin "${ECR_URI_HOST}"
 
 # upload image
-docker tag "${SOURCE_IMAGE}:${TAG}" "${ECR_URI}:${TAG}"
+docker tag "${FULL_IMAGE_NAME}" "${ECR_URI}:${TAG}"
 docker push "${ECR_URI}:${TAG}"
 
 # Sometimes it takes some time for the image to be available

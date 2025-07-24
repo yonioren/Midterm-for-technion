@@ -1,6 +1,9 @@
 #!/bin/bash
 
 . CONSTS
+DEMO_CONTAINER_NAME="demo"
+
+
 
 case "$1" in
   "-f"|"--force")
