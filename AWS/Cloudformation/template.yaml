@@ -24,17 +24,17 @@ Parameters:
     Description: "AMI ID in region. Works best with Amazon Linux. Requires yum"
   EC2InstanceType:
     Type: String
-    Default: t3.Micro
+    Default: t3.small
   AppPort:
     Type: Number
     Default: 8666
   WebPort:
     Type: Number
     Default: 80
-  IAMRoleNameToPullFromECR:
+  IAMRInstanceProfileWithRoleoToPullFromECR:
     Type: String
     Description: "IAM Role which allows to pull from ECR. Luckily, the LAB env has LabRole"
-    Default: "LabRole"
+    Default: "LabInstanceProfile"
 
 Resources:
 
@@ -252,7 +252,7 @@ Resources:
       LaunchTemplateData:
         InstanceType: !Ref EC2InstanceType
         IamInstanceProfile:
-          Name: !Ref IAMRoleNameToPullFromECR
+          Name: !Ref IAMRInstanceProfileWithRoleoToPullFromECR
         ImageId: !Ref AmiID
         SecurityGroupIds:
           - !Ref AppSecurityGroup
@@ -307,6 +307,13 @@ Resources:
       HealthCheckPath: /
       Matcher:
         HttpCode: 200
+      TargetGroupAttributes:
+        - Key: stickiness.enabled
+          Value: "true"
+        - Key: stickiness.type
+          Value: lb_cookie
+        - Key: stickiness.lb_cookie.duration_seconds
+          Value: "3600"
 
 # Listener
 
