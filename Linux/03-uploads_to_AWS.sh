@@ -3,6 +3,7 @@
 . CONSTS
 AWS_CF_TEMPLATE="${AWS_DIR}/Cloudformation/template.yaml"
 REPO_NAME="${IMAGE}" ### serves as IMAGE NAME in AWS #####
+STACK_NAME="${IMAGE}"
 
 ##### ECR #####
 
@@ -36,22 +37,14 @@ else
   exit 1
 fi
 
-################## Get latest AmazonLinux AMI ID from region
+################## Get latest AmazonLinux AMI ID from region - Amazon2 + hypervisor + 64bit + gp2 disk
 # https://aws.amazon.com/blogs/compute/query-for-the-latest-amazon-linux-ami-ids-using-aws-systems-manager-parameter-store/
-# LabRole
 AMI_ID="$(aws ec2 describe-images --owners amazon --filters "Name=name,Values=amzn2-ami-hvm-*-x86_64-gp2" "Name=state,Values=available" --query "Images | sort_by(@, &CreationDate) | [-1].ImageId" --out=text)"
 
 ##### Cloudformation #####
 
-aws cloudformation deploy --template-file "${AWS_CF_TEMPLATE}" --stack-name stackname --capabilities CAPABILITY_NAMED_IAM --parameter-overrides "EcrImageUrl=${ECR_URI}:${TAG}" "AmiID=${AMI_ID}"
+aws cloudformation deploy --template-file "${AWS_CF_TEMPLATE}" --stack-name "${STACK_NAME}" --capabilities CAPABILITY_NAMED_IAM --parameter-overrides "EcrImageUrl=${ECR_URI}:${TAG}" "AmiID=${AMI_ID}"
 
-# cloudformation reacte-stack \
-#  --stack-name my-network-stack \
-#  --template-body file://network-ha.yaml
-#
-#aws cloudformation wait stack-create-complete \
-#  --stack-name my-network-stack
-#
-#aws cloudformation describe-stacks \
-#  --stack-name my-network-stack \
-#  --query "Stacks[0].Outputs"
+aws cloudformation wait stack-create-complete --stack-name "${STACK_NAME}"
+
+aws cloudformation describe-stacks --stack-name "${STACK_NAME}" --query "Stacks[0].Outputs"
