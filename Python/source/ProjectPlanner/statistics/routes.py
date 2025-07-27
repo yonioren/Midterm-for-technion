@@ -66,7 +66,7 @@ def show_stats():
             most_used_item=0
             most_used_count=0
             most_used_item_id=0
-            for k, v in usage_counter:
+            for k, v in usage_counter.items():
                 if v > most_used_count:
                     most_used_count = v
                     most_used_item_id = k
