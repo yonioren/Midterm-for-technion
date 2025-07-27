@@ -47,3 +47,5 @@ do
     exit 1
   fi
 done
+
+echo "Alright, Let's go on with the plan! The next script is waiting"

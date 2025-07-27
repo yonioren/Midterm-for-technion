@@ -16,7 +16,11 @@ def show_stats():
     most_used_item = None
     most_used_count = 0
     avg_resources = 0
+    cpu_count = 0
+    ram_count = 0
+    hd_sum = 0
 
+    # Calculate project based statistics
     if projects:
         project_costs = []
         resource_counts = []
@@ -25,19 +29,22 @@ def show_stats():
         for project in projects:
             total_cost = 0
             total_resources = 0
+            ## Go over all items of the project and calculate
             for item_id, qty in project.resources.items():
                 item = next((i for i in inventory_items if i.id == item_id), None)
                 if item:
                     total_cost += item.price * qty
                     total_resources += qty
                     usage_counter[item_id] = usage_counter.get(item_id, 0) + qty
+                    cpu_count+=item.cpu
+                    ram_count+=item.ram
+                    hd_sum+=item.hd
 
             project_costs.append((project, total_cost))
             resource_counts.append((project, total_resources))
 
+        # Calculate project statistics based on price
         if project_costs:
-            # total_sum = sum(cost for _, cost in project_costs)
-            # most_expensive_project = max(project_costs, key=lambda x: x[1])[0]
             for proj_tup in project_costs:
                 total_sum += proj_tup[1]
                 if most_expensive_project_cost <= proj_tup[1]:
@@ -45,7 +52,7 @@ def show_stats():
                     most_expensive_project = proj_tup[0]
             avg_price = total_sum / len(project_costs)
 
-
+        # Calculate project statistics based on content in project
         if resource_counts:
             for res_tup in resource_counts:
                 if largest_project_resource_count <= res_tup[1]:
@@ -54,6 +61,7 @@ def show_stats():
             # largest_project = max(resource_counts, key=lambda x: x[1])[0]
             avg_resources = sum(c for _, c in resource_counts) / len(resource_counts)
 
+        # Calculate project statistics based on inventory usage
         if usage_counter:
             most_used_item=0
             most_used_count=0
@@ -69,10 +77,14 @@ def show_stats():
             # most_used_item = next((i for i in inventory_items if i.id == most_used_item_id), None)
             # most_used_count = usage_counter[most_used_item_id]
 
+    # I might consider creating a class to make it more readable one day
     return render_template(
         'statistics.html',
         avg_price=avg_price,
         total_sum=total_sum,
+        cpu_count=cpu_count,
+        ram_count=ram_count,
+        hd_sum=hd_sum,
         project_count=project_count,
         inventory_count=inventory_count,
         most_expensive_project=most_expensive_project,

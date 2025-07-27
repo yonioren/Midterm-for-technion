@@ -22,6 +22,9 @@
     {% if avg_resources %}
       <li>Average Resources per Project: {{ '%.2f' | format(avg_resources) }}</li>
     {% endif %}
+    <li>Overall needed CPU cores: {{ cpu_count }}</li>
+    <li>Overall needed RAM amount: {{ ram_count }}</li>
+    <li>Overall needed HD size: {{ hd_sum }}</li>
   </ul>
   {% endif %}
 
