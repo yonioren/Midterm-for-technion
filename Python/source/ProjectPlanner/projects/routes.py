@@ -2,10 +2,12 @@ from flask import render_template, request, redirect, url_for, flash
 from . import projects_bp
 from ..models import projects, inventory_items, Project
 
+# GET - display existing projects
 @projects_bp.route('/')
 def index():
     return render_template('projects.html', projects=projects, items=inventory_items)
 
+# POST - add a new project
 @projects_bp.route('/add', methods=['POST'])
 def add_project():
     name = request.form['name'].strip()
@@ -25,10 +27,13 @@ def add_project():
     flash(f"Added project: '{new_project.name}'.")
     return redirect(url_for('projects.index'))
 
+# POST - edit existing project
 @projects_bp.route('/edit/<int:project_id>', methods=['POST'])
 def edit_project(project_id):
     project = next((p for p in projects if p.id == project_id), None)
     if project:
+
+        # Although technically possible, I will not allow 2 projects with the same name
         new_name = request.form['name'].strip()
         if new_name.lower() != project.name.lower() and any(p.name.lower() == new_name.lower() for p in projects):
             flash(f"Cannot rename project to '{new_name}'; a project with this name already exists.")
@@ -45,6 +50,7 @@ def edit_project(project_id):
             if request.form.get(f'item_{item.id}') and int(request.form.get(f'item_{item.id}')) > 0
         }
 
+        # Calculate per item changes of quantity
         if new_resources != project.resources:
             res_changes = []
             all_keys = set(project.resources.keys()).union(new_resources.keys())
@@ -57,12 +63,14 @@ def edit_project(project_id):
             changes.append("resources updated: " + "; ".join(res_changes))
             project.resources = new_resources
 
+        # Display changes
         if changes:
             flash(f"Updated project '{project.name}': " + "; ".join(changes))
         else:
             flash(f"No changes made to project '{project.name}'.")
     return redirect(url_for('projects.index'))
 
+# POST -- delete project
 @projects_bp.route('/delete/<int:project_id>', methods=['POST'])
 def delete_project(project_id):
     project = next((p for p in projects if p.id == project_id), None)

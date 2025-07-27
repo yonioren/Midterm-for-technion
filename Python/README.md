@@ -53,6 +53,14 @@ POST functionalities:
 GET functionalities:
 1. Display the statistics
 
+### models
+One day this would lead to a DB, but so far it only defines in RAM the structure of:
+* Item
+* Inventory
+* Project
+* List of projects
+* UIDs
+
 ## The application is hardcoded to port 8666 because why not
 
 # Docker
