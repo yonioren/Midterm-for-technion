@@ -36,9 +36,9 @@ def show_stats():
                     total_cost += item.price * qty
                     total_resources += qty
                     usage_counter[item_id] = usage_counter.get(item_id, 0) + qty
-                    cpu_count+=item.cpu
-                    ram_count+=item.ram
-                    hd_sum+=item.hd
+                    cpu_count+=item.cpu * qty
+                    ram_count+=item.ram * qty
+                    hd_sum+=item.hd * qty
 
             project_costs.append((project, total_cost))
             resource_counts.append((project, total_resources))
