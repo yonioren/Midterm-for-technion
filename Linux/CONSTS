@@ -1,0 +1,8 @@
+IMAGE="projectplanner"
+TAG="0.0.1"
+
+FULL_IMAGE_NAME="${IMAGE}:${TAG}"
+
+LINUX_DIR="$(dirname $(readlink -f $0))"
+AWS_DIR="${LINUX_DIR}/../AWS"
+PYTHON_DIR="${LINUX_DIR}/../Python"
