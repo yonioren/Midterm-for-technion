@@ -32,7 +32,7 @@ You would be requested to select an AWS region. Embrace yourselves!
 >> 
 >> It's business time.
 >
-> _Business Time - Flight of the Concords_
+> _Business Time - Flight of the Conchords_
 
 This script will:
 1. Upload the docker image to the cloud.
