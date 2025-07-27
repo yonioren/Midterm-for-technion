@@ -41,3 +41,4 @@ This script will:
 4. Run Project Planner.
 5. Give you a URL to surf to.
 
+> Please note there is a bit of JMESPath - it's like JSONPath but less friendly
