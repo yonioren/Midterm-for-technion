@@ -11,6 +11,9 @@ RUN pip install --no-cache-dir -r /tmp/requirements.txt
 
 WORKDIR /ProjectPlanner
 ADD source/ .
+ADD tests/ .
+
+RUN pytest
 
 EXPOSE 8666
 
