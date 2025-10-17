@@ -122,6 +122,7 @@ resource "aws_instance" "app" {
             user        = "ec2-user"
             private_key = tls_private_key.key.private_key_pem
             host        = aws_instance.app.public_ip
+            timeout     = "10m"
        }
     }
 }
