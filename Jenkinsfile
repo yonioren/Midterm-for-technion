@@ -28,7 +28,7 @@ pipeline {
         stage('Test') {
             steps {
 
-                dir('app') {
+                dir('Python') {
                     sh '''
                         sudo apt-get update -y && sudo apt-get install -y python3-venv
 
@@ -36,7 +36,7 @@ pipeline {
                         . .venv/bin/activate
                         python -m pip install --upgrade pip
                         pip install -r Python/requirements.txt
-                        cd Python/source
+                        cd source
                         pytest
                     '''
                 }
@@ -45,7 +45,7 @@ pipeline {
         
         stage('Build Docker Image') {
             steps {
-                dir('app') {
+                dir('Python') {
                     sh """
                         docker build -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} .
                         docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} ${DOCKER_IMAGE_FULL}
@@ -71,14 +71,13 @@ pipeline {
         
         stage('Deploy with Terraform') {
             steps {
-                dir('terraform') {
+                dir('Terraform') {
                     withCredentials([
                         string(credentialsId: 'aws_access_key_id', variable: 'AWS_ACCESS_KEY_ID'),
                         string(credentialsId: 'aws_secret_access_key', variable: 'AWS_SECRET_ACCESS_KEY'),
                         string(credentialsId: 'aws_session_token', variable: 'AWS_SESSION_TOKEN')
                     ]) {
                         sh """
-                            cd Terraform
                             export AWS_DEFAULT_REGION=${AWS_REGION}
                             terraform init
                             terraform plan -var='docker_image=${DOCKER_IMAGE_FULL}' -out=planfile
