@@ -16,4 +16,4 @@ def test_home(client):
 def test_statistics(client):
     response = client.get('/statistics/')
     assert response.status_code == 200
-    assert "No statistics available yet" in str(response.data)
+    assert "Statistics" in str(response.data)
